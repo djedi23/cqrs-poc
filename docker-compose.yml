@@ -1,0 +1,40 @@
+version: "2"
+services:
+  mongo:
+    image: mongo:3.4
+    ports:
+      - "27017:27017"
+
+  bus:
+    image: rabbitmq:3-management
+    ports:
+      - "15672:15672"
+    environment:
+      - RABBITMQ_DEFAULT_USER=root
+      - RABBITMQ_DEFAULT_PASS=password
+
+  generator:
+    build: generator
+    environment:
+      - BUS_HOST=bus
+      - MONGO_HOST=mongo
+      - RABBITMQ_URL=amqp://root:password@bus
+      - ACK=true
+
+  eventstorer:
+    build: eventstorer
+    environment:
+      - BUS_HOST=bus
+      - MONGO_HOST=mongo
+      - RABBITMQ_URL=amqp://root:password@bus
+      - ACK=true
+
+
+  renormalizer:
+    build: renormalizer
+    environment:
+      - BUS_HOST=bus
+      - MONGO_HOST=mongo
+      - RABBITMQ_URL=amqp://root:password@bus
+      - ACK=true
+      - PREFETCH=256
